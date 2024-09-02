@@ -1,11 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game
 {
 	public class PlatformController : MonoBehaviour
 	{
+		[SerializeField] private float _minPosition;
+		[SerializeField] private float _maxPosition;
 
 	}
 }
