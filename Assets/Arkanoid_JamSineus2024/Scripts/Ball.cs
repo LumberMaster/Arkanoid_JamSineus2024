@@ -6,8 +6,8 @@ namespace Game
 	public class Ball : MonoBehaviour
 	{
 		[SerializeField] private float _damage = 1.0f;
-		[SerializeField] private float _speedMoving;
-		[SerializeField] private Vector3 _directionMoving;
+		[SerializeField] private Rigidbody _rigidBody;
+		public Rigidbody RigidBody { get => _rigidBody; protected set => _rigidBody = value; }
 
 		public UnityEvent<Block> OnCollisionBlock = new UnityEvent<Block>();
 		public UnityEvent OnDestroy = new UnityEvent();
@@ -16,7 +16,6 @@ namespace Game
 		{
 			Block blockBase = collision.gameObject.GetComponent<Block>();
 			if (blockBase == null) return;
-
 
 			blockBase.AddDamage(_damage);
 			OnCollisionBlock.Invoke(blockBase);

@@ -146,3 +146,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f08a77fb43250d488ebd56b32d7c058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnBallCollision:
+    m_PersistentCalls:
+      m_Calls: []
