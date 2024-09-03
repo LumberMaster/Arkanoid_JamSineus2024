@@ -6,32 +6,51 @@ using UnityEngine.Events;
 
 public class Block : MonoBehaviour
 {
-	[SerializeField] private float _duarability;
-	public float Duarability
+	[SerializeField] private float _currentDurability;
+	public float CurrentDurability
 	{
-		get => _duarability; 
+		get => _currentDurability; 
 		protected set
 		{
-			_duarability = value;
+			_currentDurability = value;
+			_blockMaterial.color = Color.Lerp(_lowDurabilityColor, _maxDurabilityColor, CurrentDurability / MaxDurability);
 			OnChangeDurability.Invoke();
 		}
 	}
+
+	[SerializeField] private float _maxDurability;
+	public float MaxDurability
+	{
+		get => _maxDurability;
+		protected set
+		{
+			_maxDurability = value;
+		}
+	}
+
+	[SerializeField] private Color _lowDurabilityColor;
+	[SerializeField] private Color _maxDurabilityColor;
+
+	private Material _blockMaterial;
 
 	public UnityEvent OnChangeDurability = new UnityEvent();
 	public UnityEvent<Block> OnBreak= new UnityEvent<Block>();
 
 	private void Start()
 	{
-		OnChangeDurability.Invoke();
+		_blockMaterial = GetComponent<MeshRenderer>().materials[0];
+		CurrentDurability = MaxDurability;
 	}
 
 	public void AddDamage(float damage) 
 	{
-		Duarability -= damage;
+		CurrentDurability -= damage;
 
-		if (Duarability <= 0) 
+		if (CurrentDurability <= 0) 
 		{
 			OnBreak.Invoke(this);
+
+			// TODO: В дальнейшем поменять дестрой на скрытие в пуле объектов
 			Destroy(gameObject);
 		}
 	}

@@ -28,6 +28,7 @@ namespace Game
 
 		public void Destroy()
 		{
+			// TODO: В дальнейшем поменять дестрой на скрытие в пуле объектов
 			Destroy(gameObject);
 			OnDestroy.Invoke();
 		}

@@ -1,3 +1,4 @@
+using Game.Window;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,33 +12,16 @@ namespace Game
 		[SerializeField] private PlatformController _platformController;
 		[SerializeField] private LavaArea _lavaArea;
 		[SerializeField] private InputManager _inputManager;
+		[SerializeField] private GameState _gameState;
+		[SerializeField] private WindowManager _windowManager;
 
 
-		[SerializeField] private int _healths = 3;
-		public int Healths
-		{
-			get => _healths; 
-			protected set
-			{
-				_healths = value;
-				OnChangeHealth.Invoke();
-			}
-		}
-
-		public UnityEvent OnChangeHealth = new UnityEvent();
 
 		[SerializeField] private Ball _prefabBall;
 		public List<Ball> Balls = new List<Ball>();
 		public List<Block> Blocks = new List<Block>();
 
 
-		public UnityEvent OnStart = new UnityEvent();
-
-		public UnityEvent OnSpawn = new UnityEvent();
-
-		public UnityEvent OnLose = new UnityEvent();
-
-		public UnityEvent OnWin = new UnityEvent();
 
 		private void Start()
 		{
@@ -46,25 +30,25 @@ namespace Game
 
 		private void OnEnable()
 		{
-			Cursor.visible = false;
 			_inputManager.OnMouseMove.AddListener(BindOnMouseMove);
 			_inputManager.OnMouseLeftClick.AddListener(BindOnMouseLeftClick);
+			_inputManager.OnPressESC.AddListener(BindOnPressESC);
 			_lavaArea.OnBallCollision.AddListener(BindOnBallCollision);
-			OnChangeHealth.AddListener(BindOnChangeHealth);
+			_gameState.OnChangeHealth.AddListener(BindOnChangeHealth);
 		}
 
 
 
 		private void OnDisable()
 		{
-			Cursor.visible = true;
 			_inputManager.OnMouseMove.RemoveListener(BindOnMouseMove);
 			_inputManager.OnMouseLeftClick.RemoveListener(BindOnMouseLeftClick);
+			_inputManager.OnPressESC.RemoveListener(BindOnPressESC);
 			_lavaArea.OnBallCollision.RemoveListener(BindOnBallCollision);
-			OnChangeHealth.RemoveListener(BindOnChangeHealth);
+			_gameState.OnChangeHealth.RemoveListener(BindOnChangeHealth);
 		}
 
-
+	
 		public void StartGame() 
 		{
 			if (Balls.Count > 0) return;
@@ -75,26 +59,19 @@ namespace Game
 			{
 				block.OnBreak.AddListener(BindOnBreakBlock);
 			}
-			Healths = 3;
+			_gameState.Healths = 3;
 			Respawn();
 		}
 
 	
-		public void SetPause(bool isEnablePause)
-		{
-			if(isEnablePause) Time.timeScale = 0.0f;
-			else Time.timeScale = 1.0f;
-		}
-
 		private void Respawn() 
 		{
 
-			//Ball ball = Instantiate(_prefabBall, _platformController.SpawnBallPoint.position, Quaternion.identity, transform);
 			Ball ball = SpawnBall(_platformController.SpawnBallPoint.position, _platformController.SpawnBallPoint);
 			ball.gameObject.GetComponent<TrailRenderer>().enabled = false;
 			ball.RigidBody.isKinematic = true;
 
-			OnSpawn.Invoke(); 
+			_gameState.OnSpawn.Invoke(); 
 		}
 
 		private Ball SpawnBall(Vector3 position, Transform parent) 
@@ -105,6 +82,11 @@ namespace Game
 			return ball;
 		}
 
+		private void BindOnPressESC()
+		{
+			if (_windowManager.PauseWindow.IsEnable) _windowManager.Hide();
+			else _windowManager.Show(_windowManager.PauseWindow);
+		}
 
 		private void BindOnBreakBlock(Block block)
 		{
@@ -125,7 +107,7 @@ namespace Game
 
 		private void BindOnChangeHealth()
 		{
-			_platformController.HealthText.text = Healths.ToString();
+			_platformController.HealthText.text = _gameState.Healths.ToString();
 		}
 
 		private void BindOnBallCollision(Ball ball)
@@ -133,8 +115,8 @@ namespace Game
 			Balls.Remove(ball);
 			ball.Destroy();
 
-			if (Balls.Count <= 0 && Healths > 0) { Healths--; Respawn(); }
-			if (Healths <= 0) OnLose.Invoke();
+			if (Balls.Count <= 0 && _gameState.Healths > 0) { _gameState.Healths--; Respawn(); }
+			if (_gameState.Healths <= 0) _gameState.OnLose.Invoke();
 		}
 
 		private void BindOnMouseMove(Vector3 positionMouse)

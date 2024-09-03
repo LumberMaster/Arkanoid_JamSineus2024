@@ -29,7 +29,7 @@ namespace Game
 
 		private void UpdateUI() 
         {
-			_blockDurabilityText.text = _block.Duarability.ToString();
+			_blockDurabilityText.text = _block.CurrentDurability.ToString();
 		}
     }
 }
