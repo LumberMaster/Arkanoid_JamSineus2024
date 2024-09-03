@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -17,6 +18,7 @@ public class Block : MonoBehaviour
 	}
 
 	public UnityEvent OnChangeDurability = new UnityEvent();
+	public UnityEvent<Block> OnBreak= new UnityEvent<Block>();
 
 	private void Start()
 	{
@@ -27,7 +29,11 @@ public class Block : MonoBehaviour
 	{
 		Duarability -= damage;
 
-		if(Duarability <= 0) Destroy(gameObject);
+		if (Duarability <= 0) 
+		{
+			OnBreak.Invoke(this);
+			Destroy(gameObject);
+		}
 	}
 
 }

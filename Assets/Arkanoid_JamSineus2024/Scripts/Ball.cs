@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using static Unity.VisualScripting.Member;
 
 namespace Game 
 {
@@ -7,6 +8,8 @@ namespace Game
 	{
 		[SerializeField] private float _damage = 1.0f;
 		[SerializeField] private Rigidbody _rigidBody;
+		[SerializeField] private AudioSource _source;
+		[SerializeField] private AudioClip _clipCollision;
 		public Rigidbody RigidBody { get => _rigidBody; protected set => _rigidBody = value; }
 
 		public UnityEvent<Block> OnCollisionBlock = new UnityEvent<Block>();
@@ -14,6 +17,8 @@ namespace Game
 
 		private void OnCollisionEnter(Collision collision)
 		{
+			_source.PlayOneShot(_clipCollision);
+
 			Block blockBase = collision.gameObject.GetComponent<Block>();
 			if (blockBase == null) return;
 

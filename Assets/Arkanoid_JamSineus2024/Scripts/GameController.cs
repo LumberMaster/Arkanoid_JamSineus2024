@@ -27,7 +27,8 @@ namespace Game
 		public UnityEvent OnChangeHealth = new UnityEvent();
 
 		[SerializeField] private Ball _prefabBall;
-		private List<Ball> _balls = new List<Ball>();
+		public List<Ball> Balls = new List<Ball>();
+		public List<Block> Blocks = new List<Block>();
 
 
 		public UnityEvent OnStart = new UnityEvent();
@@ -66,13 +67,19 @@ namespace Game
 
 		public void StartGame() 
 		{
-			if (_balls.Count > 0) return;
-			
+			if (Balls.Count > 0) return;
+
+
+			Blocks = new List<Block>(FindObjectsOfType<Block>());
+			foreach (Block block in Blocks) 
+			{
+				block.OnBreak.AddListener(BindOnBreakBlock);
+			}
 			Healths = 3;
 			Respawn();
 		}
 
-
+	
 		public void SetPause(bool isEnablePause)
 		{
 			if(isEnablePause) Time.timeScale = 0.0f;
@@ -81,20 +88,39 @@ namespace Game
 
 		private void Respawn() 
 		{
-			//Ball ball = Instantiate(_prefabBall, _platformController.SpawnBallPoint.position, Quaternion.identity, _platformController.SpawnBallPoint);
-			Ball ball = Instantiate(_prefabBall, _platformController.SpawnBallPoint.position, Quaternion.identity, transform);
-			_balls.Add(ball);
+
+			//Ball ball = Instantiate(_prefabBall, _platformController.SpawnBallPoint.position, Quaternion.identity, transform);
+			Ball ball = SpawnBall(_platformController.SpawnBallPoint.position, _platformController.SpawnBallPoint);
+			ball.gameObject.GetComponent<TrailRenderer>().enabled = false;
+			ball.RigidBody.isKinematic = true;
 
 			OnSpawn.Invoke(); 
 		}
 
+		private Ball SpawnBall(Vector3 position, Transform parent) 
+		{
+			Ball ball = Instantiate(_prefabBall, position, Quaternion.identity, parent);
+			Balls.Add(ball);
+
+			return ball;
+		}
+
+
+		private void BindOnBreakBlock(Block block)
+		{
+			block.OnBreak.RemoveListener(BindOnBreakBlock);
+			Ball ball = SpawnBall(block.transform.position, null);
+			Blocks.Remove(block);
+		}
 
 		private void BindOnMouseLeftClick()
 		{
-			if (_balls.Count != 1) return;
+			if (Balls.Count != 1) return;
 
-			_balls[0].RigidBody.isKinematic = false;
-			_balls[0].RigidBody.AddForce(Vector3.up);
+			Balls[0].RigidBody.isKinematic = false;
+			Balls[0].gameObject.GetComponent<TrailRenderer>().enabled = true;
+			Balls[0].transform.parent = null;
+			Balls[0].RigidBody.AddForce(Vector3.up*400);
 		}
 
 		private void BindOnChangeHealth()
@@ -104,10 +130,10 @@ namespace Game
 
 		private void BindOnBallCollision(Ball ball)
 		{
-			_balls.Remove(ball);
+			Balls.Remove(ball);
 			ball.Destroy();
 
-			if (_balls.Count <= 0 && Healths > 0) { Healths--; Respawn(); }
+			if (Balls.Count <= 0 && Healths > 0) { Healths--; Respawn(); }
 			if (Healths <= 0) OnLose.Invoke();
 		}
 
