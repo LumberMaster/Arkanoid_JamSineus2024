@@ -1,31 +1,58 @@
-using Game.Window;
-using System;
+﻿using Game.Window;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Game
 {
+	/// <summary>
+	/// Очень плохой патерн синглтона и антипатерн божественого объекта :(
+	/// ☭✞✞Боже помоги избавить код от большой связности ✞✞☭
+	/// </summary>
 	public class GameController : MonoBehaviour
 	{
 
-		[SerializeField] private PlatformController _platformController;
-		[SerializeField] private LavaArea _lavaArea;
-		[SerializeField] private InputManager _inputManager;
-		[SerializeField] private GameState _gameState;
-		[SerializeField] private WindowManager _windowManager;
+		private static GameController _instance;
+		public static GameController Instance { 
+			get => _instance; 
+			protected set => _instance = value; 
+		}
 
+		[SerializeField] private PlatformController _platformController;
+		public PlatformController PlatformController { 
+			get => _platformController; 
+			protected set => _platformController = value; 
+		}
+
+		[SerializeField] private WindowManager _windowManager;
+		public WindowManager WindowManager { 
+			get => _windowManager; 
+			protected set => _windowManager = value; 
+		}
+
+		[SerializeField] private GameState _gameState;
+		public GameState GameState { 
+			get => _gameState; 
+			protected set => _gameState = value; 
+		}
+
+		[SerializeField] private LavaArea _lavaArea;
+		public LavaArea LavaArea { 
+			get => _lavaArea; 
+			protected set => _lavaArea = value; 
+		}
+
+
+		[SerializeField] private InputManager _inputManager;
 
 
 		[SerializeField] private Ball _prefabBall;
-		public List<Ball> Balls = new List<Ball>();
-		public List<Block> Blocks = new List<Block>();
+		public List<Ball> _balls = new List<Ball>();
+		public List<Block> _blocks = new List<Block>();
 
-
-
-		private void Start()
+		private void Awake()
 		{
-			StartGame();
+			Instance = this;
+			DontDestroyOnLoad(Instance);
 		}
 
 		private void OnEnable()
@@ -33,101 +60,133 @@ namespace Game
 			_inputManager.OnMouseMove.AddListener(BindOnMouseMove);
 			_inputManager.OnMouseLeftClick.AddListener(BindOnMouseLeftClick);
 			_inputManager.OnPressESC.AddListener(BindOnPressESC);
-			_lavaArea.OnBallCollision.AddListener(BindOnBallCollision);
-			_gameState.OnChangeHealth.AddListener(BindOnChangeHealth);
+			LavaArea.OnBallCollision.AddListener(BindOnBallCollision);
+			GameState.OnChangeHealth.AddListener(BindOnChangeHealth);
+			GameState.OnLose.AddListener(BindOnLose);
+			GameState.OnWin.AddListener(BindOnWin);
 		}
-
-
 
 		private void OnDisable()
 		{
 			_inputManager.OnMouseMove.RemoveListener(BindOnMouseMove);
 			_inputManager.OnMouseLeftClick.RemoveListener(BindOnMouseLeftClick);
 			_inputManager.OnPressESC.RemoveListener(BindOnPressESC);
-			_lavaArea.OnBallCollision.RemoveListener(BindOnBallCollision);
-			_gameState.OnChangeHealth.RemoveListener(BindOnChangeHealth);
+			LavaArea.OnBallCollision.RemoveListener(BindOnBallCollision);
+			GameState.OnChangeHealth.RemoveListener(BindOnChangeHealth);
+			GameState.OnLose.RemoveListener(BindOnLose);
+			GameState.OnWin.RemoveListener(BindOnWin);
 		}
 
 	
 		public void StartGame() 
 		{
-			if (Balls.Count > 0) return;
+		
+			if (_balls.Count > 0) return;
 
 
-			Blocks = new List<Block>(FindObjectsOfType<Block>());
-			foreach (Block block in Blocks) 
+			_blocks = new List<Block>(FindObjectsOfType<Block>());
+			foreach (Block block in _blocks) 
 			{
 				block.OnBreak.AddListener(BindOnBreakBlock);
 			}
-			_gameState.Healths = 3;
-			Respawn();
+
+			GameState.ReciveMessage("StartGame");
+			RespawnBall();
 		}
 
-	
-		private void Respawn() 
+		public void ReloadGame()
+		{
+			ResetGame();
+			StartGame();
+		}
+
+		private void ResetGame()
+		{
+			foreach (Ball ball in _balls) ball.Destroy();
+			foreach (Block block in _blocks)
+			{
+				block.OnBreak.RemoveListener(BindOnBreakBlock);
+				block.Destroy();
+			}
+
+			_balls.Clear();
+			_blocks.Clear();
+
+			GameState.ReciveMessage("ResetGame");
+		}
+
+		private void RespawnBall() 
 		{
 
-			Ball ball = SpawnBall(_platformController.SpawnBallPoint.position, _platformController.SpawnBallPoint);
+			Ball ball = SpawnBall(PlatformController.SpawnBallPoint.position, PlatformController.SpawnBallPoint);
 			ball.gameObject.GetComponent<TrailRenderer>().enabled = false;
 			ball.RigidBody.isKinematic = true;
 
-			_gameState.OnSpawn.Invoke(); 
+			GameState.ReciveMessage("SpawnBall"); 
 		}
 
 		private Ball SpawnBall(Vector3 position, Transform parent) 
 		{
 			Ball ball = Instantiate(_prefabBall, position, Quaternion.identity, parent);
-			Balls.Add(ball);
-
+			_balls.Add(ball);
 			return ball;
 		}
 
+
+
+		private void BindOnWin()
+		{
+			WindowManager.Show(WindowManager.WinWindow);
+		}
+
+		private void BindOnLose()
+		{
+			WindowManager.Show(WindowManager.LoseWindow);
+		}
 		private void BindOnPressESC()
 		{
-			if (_windowManager.PauseWindow.IsEnable) _windowManager.Hide();
-			else _windowManager.Show(_windowManager.PauseWindow);
+			if (WindowManager.PauseWindow.IsEnable) WindowManager.Hide();
+			else WindowManager.Show(WindowManager.PauseWindow);
 		}
 
 		private void BindOnBreakBlock(Block block)
 		{
 			block.OnBreak.RemoveListener(BindOnBreakBlock);
 			Ball ball = SpawnBall(block.transform.position, null);
-			Blocks.Remove(block);
+			_blocks.Remove(block);
+
+			if(_blocks.Count == 0) GameState.ReciveMessage("Win");
 		}
 
 		private void BindOnMouseLeftClick()
 		{
-			if (Balls.Count != 1) return;
+			if (GameState.State != EGameStates.FirstLaunch) return;
+			if (_balls.Count != 1) return;
 
-			Balls[0].RigidBody.isKinematic = false;
-			Balls[0].gameObject.GetComponent<TrailRenderer>().enabled = true;
-			Balls[0].transform.parent = null;
-			Balls[0].RigidBody.AddForce(Vector3.up*400);
+			_balls[0].RigidBody.isKinematic = false;
+			_balls[0].gameObject.GetComponent<TrailRenderer>().enabled = true;
+			_balls[0].transform.parent = null;
+			_balls[0].RigidBody.AddForce(Vector3.up*400);
+			GameState.ReciveMessage("BallLaunched");
 		}
 
 		private void BindOnChangeHealth()
 		{
-			_platformController.HealthText.text = _gameState.Healths.ToString();
+			PlatformController.HealthText.text = GameState.Healths.ToString();
 		}
 
 		private void BindOnBallCollision(Ball ball)
 		{
-			Balls.Remove(ball);
+			_balls.Remove(ball);
 			ball.Destroy();
 
-			if (Balls.Count <= 0 && _gameState.Healths > 0) { _gameState.Healths--; Respawn(); }
-			if (_gameState.Healths <= 0) _gameState.OnLose.Invoke();
+			if (_balls.Count <= 0 && GameState.Healths > 0) { GameState.Healths--; RespawnBall(); }
+			if (GameState.Healths <= 0) GameState.ReciveMessage("Lose");
 		}
 
-		private void BindOnMouseMove(Vector3 positionMouse)
-		{
-			_platformController.transform.position = new Vector3(
-				positionMouse.x,
-				_platformController.transform.position.y,
-				_platformController.transform.position.z
-			);
+		private void BindOnMouseMove(Vector3 positionMouse) => PlatformController.SetPosition(positionMouse.x);
 
-		}
+		
 
 	}
 }

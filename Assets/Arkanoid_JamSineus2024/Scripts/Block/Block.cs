@@ -46,13 +46,14 @@ public class Block : MonoBehaviour
 	{
 		CurrentDurability -= damage;
 
-		if (CurrentDurability <= 0) 
-		{
-			OnBreak.Invoke(this);
-
-			// TODO: В дальнейшем поменять дестрой на скрытие в пуле объектов
-			Destroy(gameObject);
-		}
+		if (CurrentDurability <= 0) Destroy();
 	}
 
+	public void Destroy()
+	{
+
+		OnBreak.Invoke(this);
+		// TODO: В дальнейшем поменять дестрой на скрытие в пуле объектов
+		Destroy(gameObject);
+	}
 }

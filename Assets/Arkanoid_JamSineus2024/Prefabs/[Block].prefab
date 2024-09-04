@@ -339,9 +339,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _currentDurability: 0
-  _maxDurability: 20
-  _lowDurabilityColor: {r: 0.8113208, g: 0.22237383, b: 0.13394445, a: 1}
-  _maxDurabilityColor: {r: 0.56460136, g: 0.12967247, b: 0.5849056, a: 1}
+  _maxDurability: 10
+  _lowDurabilityColor: {r: 1, g: 0.22997302, b: 0.18396229, a: 1}
+  _maxDurabilityColor: {r: 0.2952113, g: 0.023362404, b: 0.3301887, a: 1}
   OnChangeDurability:
     m_PersistentCalls:
       m_Calls: []

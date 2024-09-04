@@ -284,7 +284,7 @@ GameObject:
   - component: {fileID: 999068457450633978}
   - component: {fileID: 3303805369188189778}
   m_Layer: 5
-  m_Name: ReplayButton
+  m_Name: ReloadButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -507,6 +507,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a0020ef3870bd540b6d391909aa173d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isEnable: 0
+  _reloadGameButton: {fileID: 3303805369188189778}
+  _exitButton: {fileID: 4294625065563112354}
 --- !u!1 &7391717101371688152
 GameObject:
   m_ObjectHideFlags: 0

@@ -49,9 +49,10 @@ namespace Game.Window
 		private void BindOnClickPlayButton()
 		{
 			this.Hide();
+			GameController.Instance.StartGame();
 		}
 
-	
+
 	}
 
 }

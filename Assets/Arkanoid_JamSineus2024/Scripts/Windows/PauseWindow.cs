@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 namespace Game.Window
@@ -37,11 +35,14 @@ namespace Game.Window
 		private void BindOnClickExitButton()
 		{
 			this.Hide();
+			AWindow window = GameController.Instance.WindowManager.MainWindow;
+			GameController.Instance.WindowManager.Show(window);
 		}
 
 		private void BindOnClickReloadButton()
 		{
-			throw new NotImplementedException();
+			this.Hide();
+			GameController.Instance.ReloadGame();
 		}
 
 		private void BindOnClickPlayButton()
