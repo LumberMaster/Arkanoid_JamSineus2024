@@ -41,13 +41,20 @@ namespace Game
 			protected set => _lavaArea = value; 
 		}
 
+		[SerializeField] private LevelManager _levelManager;
+		public LevelManager LevelManager
+		{
+			get => _levelManager;
+			protected set => _levelManager = value;
+		}
+
 
 		[SerializeField] private InputManager _inputManager;
 
 
 		[SerializeField] private Ball _prefabBall;
 		public List<Ball> _balls = new List<Ball>();
-		public List<Block> _blocks = new List<Block>();
+		
 
 		private void Awake()
 		{
@@ -64,6 +71,7 @@ namespace Game
 			GameState.OnChangeHealth.AddListener(BindOnChangeHealth);
 			GameState.OnLose.AddListener(BindOnLose);
 			GameState.OnWin.AddListener(BindOnWin);
+			LevelManager.OnBreakBlock.AddListener(BindOnBreakBlock);
 		}
 
 		private void OnDisable()
@@ -75,42 +83,28 @@ namespace Game
 			GameState.OnChangeHealth.RemoveListener(BindOnChangeHealth);
 			GameState.OnLose.RemoveListener(BindOnLose);
 			GameState.OnWin.RemoveListener(BindOnWin);
+			LevelManager.OnBreakBlock.RemoveListener(BindOnBreakBlock);
+
 		}
 
-	
+
 		public void StartGame() 
 		{
-		
+			ResetGame();
 			if (_balls.Count > 0) return;
 
-
-			_blocks = new List<Block>(FindObjectsOfType<Block>());
-			foreach (Block block in _blocks) 
-			{
-				block.OnBreak.AddListener(BindOnBreakBlock);
-			}
+			LevelManager.LoadLevel(GameState.PlayerLevel);
 
 			GameState.ReciveMessage("StartGame");
 			RespawnBall();
 		}
 
-		public void ReloadGame()
-		{
-			ResetGame();
-			StartGame();
-		}
 
 		private void ResetGame()
 		{
 			foreach (Ball ball in _balls) ball.Destroy();
-			foreach (Block block in _blocks)
-			{
-				block.OnBreak.RemoveListener(BindOnBreakBlock);
-				block.Destroy();
-			}
-
+			
 			_balls.Clear();
-			_blocks.Clear();
 
 			GameState.ReciveMessage("ResetGame");
 		}
@@ -151,11 +145,9 @@ namespace Game
 
 		private void BindOnBreakBlock(Block block)
 		{
-			block.OnBreak.RemoveListener(BindOnBreakBlock);
 			Ball ball = SpawnBall(block.transform.position, null);
-			_blocks.Remove(block);
-
-			if(_blocks.Count == 0) GameState.ReciveMessage("Win");
+			
+			if (LevelManager.CurrentLevel.Blocks.Count == 0) GameState.ReciveMessage("Win");
 		}
 
 		private void BindOnMouseLeftClick()

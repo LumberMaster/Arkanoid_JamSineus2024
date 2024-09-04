@@ -42,7 +42,7 @@ namespace Game.Window
 		private void BindOnClickReloadButton()
 		{
 			this.Hide();
-			GameController.Instance.ReloadGame();
+			GameController.Instance.StartGame();
 		}
 
 		private void BindOnClickPlayButton()

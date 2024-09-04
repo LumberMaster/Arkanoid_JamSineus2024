@@ -37,16 +37,24 @@ namespace Game.Window
 
 		private void BindOnClickNextLevelButton()
 		{
-			throw new NotImplementedException();
+
+			if (GameController.Instance.GameState.PlayerLevel + 1 >= GameController.Instance.LevelManager.Levels.Count) GameController.Instance.GameState.PlayerLevel = 0;
+			else GameController.Instance.GameState.PlayerLevel++;
+
+			GameController.Instance.StartGame();
+			this.Hide();
 		}
 
 		private void BindOnClickReloadButton()
 		{
-			GameController.Instance.ReloadGame();
+			GameController.Instance.StartGame();
+			this.Hide();
+
 		}
 
 		private void BindOnClickExitButton()
 		{
+
 			AWindow window = GameController.Instance.WindowManager.MainWindow;
 			GameController.Instance.WindowManager.Show(window);
 		}

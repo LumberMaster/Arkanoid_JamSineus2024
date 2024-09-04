@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -41,6 +42,19 @@ namespace Game
 		public UnityEvent OnChangeHealth = new UnityEvent();
 
 
+		[SerializeField] private int _playerLevel = 0;
+		public int PlayerLevel
+		{
+			get => _playerLevel;
+			set
+			{
+				_playerLevel = value;
+				_playerLevelText.text = "Уровень " + _playerLevel;
+			}
+		}
+		[SerializeField] private TMP_Text _playerLevelText;
+
+
 		public UnityEvent OnStart = new UnityEvent();
 
 		public UnityEvent OnSpawnBall = new UnityEvent();
@@ -48,6 +62,11 @@ namespace Game
 		public UnityEvent OnLose = new UnityEvent();
 
 		public UnityEvent OnWin = new UnityEvent();
+
+		private void Awake()
+		{
+			_playerLevelText.text = "Уровень " + PlayerLevel;
+		}
 
 		public void ReciveMessage(string message) 
 		{

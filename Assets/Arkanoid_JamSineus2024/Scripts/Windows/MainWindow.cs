@@ -15,13 +15,13 @@ namespace Game.Window
 		private void OnEnable()
 		{
 			_playButton.onClick.AddListener(BindOnClickPlayButton);
-			_aboutGameButton.onClick.AddListener(BindOnClickAboutGameButton);
+			//_aboutGameButton.onClick.AddListener(BindOnClickAboutGameButton);
 			_exitButton.onClick.AddListener(BindOnClickExitButton);
 		}
 		private void OnDisable()
 		{
 			_playButton.onClick.RemoveListener(BindOnClickPlayButton);
-			_aboutGameButton.onClick.RemoveListener(BindOnClickAboutGameButton);
+			//_aboutGameButton.onClick.RemoveListener(BindOnClickAboutGameButton);
 			_exitButton.onClick.RemoveListener(BindOnClickExitButton);
 		}
 

@@ -35,7 +35,7 @@ namespace Game.Window
 
 		private void BindOnClickReloadButton()
 		{
-			GameController.Instance.ReloadGame();
+			GameController.Instance.StartGame();
 		}
 
 		private void BindOnClickExitButton()

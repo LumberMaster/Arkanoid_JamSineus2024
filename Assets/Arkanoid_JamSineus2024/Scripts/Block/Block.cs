@@ -54,6 +54,7 @@ public class Block : MonoBehaviour
 
 		OnBreak.Invoke(this);
 		// TODO: В дальнейшем поменять дестрой на скрытие в пуле объектов
-		Destroy(gameObject);
+		gameObject.SetActive(false);
+		//Destroy(gameObject);
 	}
 }

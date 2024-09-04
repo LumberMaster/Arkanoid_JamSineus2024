@@ -799,7 +799,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isEnable: 0
-  _nextLevelButton: {fileID: 0}
+  _nextLevelButton: {fileID: 1564179332699188889}
   _reloadGameButton: {fileID: 2389837442113301668}
   _exitButton: {fileID: 6569972490754265194}
 --- !u!1 &8769085188039732687
